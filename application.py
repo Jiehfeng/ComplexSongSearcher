@@ -160,6 +160,10 @@ def search():
 
         for index, paraphrased in enumerate(all_paraphrased):
             for phrase in phrases:
+                # Empty Lines
+                if not phrase:
+                    continue
+
                 similarity = round(lyrical_similarity(phrase, paraphrased) * 100, 2)
                 query_similarity = round(lyrical_similarity(phrase, query) * 100, 2)
 
