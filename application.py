@@ -216,7 +216,18 @@ def paraphrase():
 
 # Lyrical Sequence Rater
 def lyrical_similarity(a, b):
-    return SequenceMatcher(None, a, b).ratio()
+    a_words = a.split()
+    b_words = b.split()
+
+    similar_count = 0
+    total_count = len(a_words)    # Original
+
+    for a_word in a_words:
+        if a_word in b_words:
+            similar_count += 1
+
+    return similar_count / total_count
+    # return SequenceMatcher(None, a, b).ratio()
 
 
 # Lyrics Paraphraser
