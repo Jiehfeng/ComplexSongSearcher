@@ -192,7 +192,8 @@ def search():
             print('[Song Searcher] - THIS PROGRAM PROVED TO BE {} % BETTER AT A '
                   'DIRECT SEARCH QUERY.'.format(better_percentage))
         except ZeroDivisionError:
-            pass
+            print('[Song Searcher] - THIS PROGRAM PROVED TO BE {} % BETTER AT A '
+                  'DIRECT SEARCH QUERY.'.format((similarity_score_list[song_index] - direct_query_similarity_score_list[song_index]) * 100))
         print()
 
     return "OK"
