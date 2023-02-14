@@ -1,5 +1,6 @@
-import multiprocessing
-from multiprocessing import Process
+import sys
+import threading
+from multiprocessing.pool import ThreadPool
 
 from tqdm import tqdm
 import pandas as pd
@@ -26,8 +27,8 @@ warnings.filterwarnings("ignore")
 
 model_name = "tuner007/pegasus_paraphrase"
 torch_device = "cuda" if torch.cuda.is_available() else "cpu"
-tokenizer = None
-model = None
+tokenizer = PegasusTokenizer.from_pretrained(model_name)
+model = PegasusForConditionalGeneration.from_pretrained(model_name).to(torch_device)
 
 
 # Database
@@ -47,12 +48,12 @@ def paraphrase_lyrics(lyrics, number_of_variations):
                                                       padding="longest",
                                                       max_length=60,
                                                       return_tensors="pt").to(torch_device)
-    num_of_beams = len(lyrics.split()) * 4
+    num_beams = len(lyrics.split()) + 5
     processed_phrases = model.generate(**lyrical_phrases,
-                                       max_length=100,
-                                       num_beams=num_of_beams,
-                                       num_return_sequences=num_of_beams,
-                                       temperature=1.5)
+                                           max_length=100,
+                                           num_beams=num_beams,
+                                           num_return_sequences=number_of_variations,
+                                           temperature=1.5)
 
     paraphrased_lyrics = tokenizer.batch_decode(processed_phrases, skip_special_tokens=True)
     return paraphrased_lyrics
@@ -124,15 +125,20 @@ def submit_song():
         formatted_lyrics = json.dumps({"Lyrics": lyrics})
 
         paraphrased = ""
+        sys.stderr.flush()
         print('[SONG SEARCHER] - Paraphrasing lyrics...')
+
         for line in tqdm(lyrics.splitlines()):
             if not line:
                 continue
-            parphrased_lyrics = paraphrase_lyrics(line, 20)
+            parphrased_lyrics = paraphrase_lyrics(line, 4)
             for para in parphrased_lyrics:
                 paraphrased += para + "\n"
 
         other = json.dumps({"Paraphrased Lyrics": paraphrased})
+
+        print("ORIGINAL LYRICS: {}\n\n".format(lyrics))
+        print("PARAPHRASED LYRICS: {}\n\n".format(paraphrased))
 
         try:
             cur.execute("INSERT INTO songs (title, artist, lyrics, other) VALUES (%s, %s, %s, %s)", (title,
@@ -150,6 +156,19 @@ def submit_song():
             conn.rollback()
 
     return "OK"
+
+
+def process_paraphrase(lines):
+    paraphrased = ""
+
+    for line in tqdm(lines):
+        if line:
+            parphrased_lyrics = paraphrase_lyrics(line, 20)
+
+            for para in parphrased_lyrics:
+                paraphrased += para + "\n"
+
+    return paraphrased
 
 
 '''cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -225,7 +244,7 @@ def search():
     print("\n\n---\n\n")
 
     # Paraphrase Query
-    all_paraphrased = lyrical_paraphraser(query)
+    all_paraphrased = paraphrase_lyrics(query, 4)
     similarity_score_list = []
     direct_query_similarity_score_list = []
 
@@ -307,7 +326,10 @@ def search():
 
         print('\n---------\n')
 
-    top_5_indices = np.argpartition(similarity_score_list, -3)[-3:]
+    indices = len(all_songs)
+    if indices > 5:
+        indices = 5
+    top_5_indices = np.argpartition(similarity_score_list, -indices)[-indices:]
 
     for song_index in top_5_indices:
         song = all_songs[song_index]
@@ -395,8 +417,6 @@ def lyrical_paraphraser(query):
 
 
 if __name__ == "__main__":
-    tokenizer = PegasusTokenizer.from_pretrained(model_name)
-    model = PegasusForConditionalGeneration.from_pretrained(model_name).to(torch_device)
     application.run(host="0.0.0.0", debug=False)
 
 conn.close()
