@@ -409,6 +409,47 @@ def lyrical_similarity(a, b):
     # return SequenceMatcher(None, a, b).ratio()
 
 
+# Batch Submission of Lyrics
+def batch_submit_func(formatted_lyric_sets):
+    title = request.args.get("title")
+    artist = request.args.get("artist")
+    lyrics = request.args.get("lyrics")
+
+    for lyrics in tqdm(formatted_lyric_sets, position=0):
+        formatted_lyrics = json.dumps({"Lyrics": lyrics})
+
+        paraphrased = ""
+        sys.stderr.flush()
+        print('[SONG SEARCHER] - Paraphrasing lyrics...')
+
+        for line in tqdm(lyrics["Lyrics"].splitlines(), position=1):
+            if not line:
+                continue
+            parphrased_lyrics = paraphrase_lyrics(line, 4)
+            for para in parphrased_lyrics:
+                paraphrased += para + "\n"
+
+        other = json.dumps({"Paraphrased Lyrics": paraphrased})
+
+        print("ORIGINAL LYRICS: {}\n\n".format(lyrics["Lyrics"]))
+        print("PARAPHRASED LYRICS: {}\n\n".format(paraphrased))
+
+        try:
+            cur.execute("INSERT INTO songs (title, artist, lyrics, other) VALUES (%s, %s, %s, %s)", (lyrics["Title"],
+                                                                                                     lyrics["Artist"],
+                                                                                                     formatted_lyrics,
+                                                                                                     other))
+            conn.commit()
+
+            print("ORIGINAL LYRICS: {}\n\n".format(lyrics))
+            print("PARAPHRASED LYRICS: {}\n\n".format(paraphrased))
+        except:
+            print('[Song Searcher] - Sorry, song submission failed. Try again. (ERROR BELOW)')
+            traceback.print_exc()
+            cur.close()
+            conn.rollback()
+
+
 # Lyrics Paraphraser
 def lyrical_paraphraser(query):
     paraphrased_lyrics = paraphrase_lyrics(query, 20)
