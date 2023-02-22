@@ -135,7 +135,7 @@ def submit_song():
                 continue
             try:
                 parphrased_lyrics = paraphrase_lyrics(line, 4)
-            except:
+            except Exception:
                 continue
             for para in parphrased_lyrics:
                 paraphrased += para + "\n"
