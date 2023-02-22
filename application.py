@@ -449,7 +449,7 @@ def lyrical_similarity(a, b):
 # Batch Submission of Lyrics
 def batch_submit_func(formatted_lyric_sets):
     for index, lyrics in enumerate(tqdm(formatted_lyric_sets.iterrows(), position=0)):
-        formatted_lyrics = json.dumps({"Lyrics": lyrics[1]["lyrics"]})
+        formatted_lyrics = json.dumps({"Lyrics": lyrics["lyrics"]})
 
         unique_lyrics = list(set(lyrics[1]["lyrics"].splitlines()))
 
