@@ -393,8 +393,8 @@ def paraphrase():
 @application.route("/batch")
 def batch():
     print("Reading CSV...")
-    number_of_times = request.args.get("Number")
-    start = request.args.get("Start")
+    number_of_times = int(request.args.get("Number"))
+    start = int(request.args.get("Start"))
 
     dataset = pd.read_csv("song_lyrics_processed.csv", skiprows=start, nrows=number_of_times)
     print("Read CSV.")
