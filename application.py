@@ -442,7 +442,6 @@ def batch_submit_func(formatted_lyric_sets):
         for line in tqdm(unique_lyrics, position=1):
             if not line or line == "" or line is None or len(line.split()) <= 3:
                 continue
-            print(line)
             paraphrased_lyrics = paraphrase_lyrics(line, 4)
             for para in paraphrased_lyrics:
                 paraphrased += para + "\n"
