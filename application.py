@@ -101,6 +101,8 @@ def home_view():
                     print("ERROR.")
                     break'''
 
+
+
     return "<h1>Welcome to Song Searcher</h1>"
 
 
@@ -388,6 +390,18 @@ def paraphrase():
     return formatted_string
 
 
+@application.route("/batch")
+def batch():
+    print("Reading CSV...")
+    dataset = pd.read_csv("song_lyrics_processed.csv")
+    print("Read CSV.")
+
+    number_of_times = request.args.get("Number")
+    start = request.args.get("Start")
+
+    batch_submit_func(dataset, number, start)
+
+
 # Lyrical Sequence Rater
 def lyrical_similarity(a, b):
     a_words = a.lower().split()
@@ -410,12 +424,17 @@ def lyrical_similarity(a, b):
 
 
 # Batch Submission of Lyrics
-def batch_submit_func(formatted_lyric_sets):
+def batch_submit_func(formatted_lyric_sets, number, start):
     title = request.args.get("title")
     artist = request.args.get("artist")
     lyrics = request.args.get("lyrics")
 
-    for lyrics in tqdm(formatted_lyric_sets, position=0):
+    for index, lyrics in enumerate(tqdm(formatted_lyric_sets, position=0)):
+        if index > number:
+            break
+        if index < start:
+            continue
+
         formatted_lyrics = json.dumps({"Lyrics": lyrics})
 
         paraphrased = ""
