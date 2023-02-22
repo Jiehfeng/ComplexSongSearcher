@@ -409,6 +409,21 @@ def batch():
 
     batch_submit_func(dataset)
 
+    return "OK"
+
+
+@application.route("/show-songs")
+def show_songs():
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute("SELECT * FROM songs")
+    songs = cur.fetchall()
+    song_list = ""
+
+    for index, song in songs:
+        song_list += str(index) + song[1] + " - " + song[2] + "\n"
+
+    return song_list
+
 
 # Lyrical Sequence Rater
 def lyrical_similarity(a, b):
