@@ -455,6 +455,7 @@ def batch_submit_func(formatted_lyric_sets):
         print("PARAPHRASED LYRICS: {}\n\n".format(paraphrased))
 
         try:
+            cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
             cur.execute("INSERT INTO songs (title, artist, lyrics, other) VALUES (%s, %s, %s, %s)", (lyrics[1]["title"],
                                                                                                      lyrics[1]["artist"],
                                                                                                      formatted_lyrics,
