@@ -131,7 +131,7 @@ def submit_song():
         print('[SONG SEARCHER] - Paraphrasing lyrics...')
 
         for line in tqdm(lyrics.splitlines()):
-            if not line or line == "" or line is None:
+            if not line or line == "" or line is None or len(line.split()) <= 1:
                 continue
             parphrased_lyrics = paraphrase_lyrics(line, 4)
             for para in parphrased_lyrics:
