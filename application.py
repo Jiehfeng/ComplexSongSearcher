@@ -133,7 +133,10 @@ def submit_song():
         for line in tqdm(lyrics.splitlines()):
             if not line:
                 continue
-            parphrased_lyrics = paraphrase_lyrics(line, 4)
+            try:
+                parphrased_lyrics = paraphrase_lyrics(line, 4)
+            except:
+                continue
             for para in parphrased_lyrics:
                 paraphrased += para + "\n"
 
@@ -441,8 +444,8 @@ def batch_submit_func(formatted_lyric_sets):
         for line in tqdm(unique_lyrics, position=1):
             if not line:
                 continue
-            parphrased_lyrics = paraphrase_lyrics(line, 4)
-            for para in parphrased_lyrics:
+            paraphrased_lyrics = paraphrase_lyrics(line, 4)
+            for para in paraphrased_lyrics:
                 paraphrased += para + "\n"
 
         other = json.dumps({"Paraphrased Lyrics": paraphrased})
