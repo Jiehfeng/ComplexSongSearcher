@@ -393,13 +393,13 @@ def paraphrase():
 @application.route("/batch")
 def batch():
     print("Reading CSV...")
-    dataset = pd.read_csv("song_lyrics_processed.csv")
-    print("Read CSV.")
-
     number_of_times = request.args.get("Number")
     start = request.args.get("Start")
 
-    batch_submit_func(dataset, number, start)
+    dataset = pd.read_csv("song_lyrics_processed.csv", skiprows=start, nrows=number_of_times)
+    print("Read CSV.")
+
+    batch_submit_func(dataset)
 
 
 # Lyrical Sequence Rater
@@ -424,17 +424,12 @@ def lyrical_similarity(a, b):
 
 
 # Batch Submission of Lyrics
-def batch_submit_func(formatted_lyric_sets, number, start):
+def batch_submit_func(formatted_lyric_sets):
     title = request.args.get("title")
     artist = request.args.get("artist")
     lyrics = request.args.get("lyrics")
 
     for index, lyrics in enumerate(tqdm(formatted_lyric_sets, position=0)):
-        if index > number:
-            break
-        if index < start:
-            continue
-
         formatted_lyrics = json.dumps({"Lyrics": lyrics})
 
         paraphrased = ""
