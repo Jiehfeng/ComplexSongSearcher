@@ -432,11 +432,13 @@ def batch_submit_func(formatted_lyric_sets):
     for index, lyrics in enumerate(tqdm(formatted_lyric_sets.iterrows(), position=0)):
         formatted_lyrics = json.dumps({"Lyrics": lyrics[1]["lyrics"]})
 
+        unique_lyrics = list(set(lyrics[1]["lyrics"].splitlines()))
+
         paraphrased = ""
         sys.stderr.flush()
         print('[SONG SEARCHER] - Paraphrasing lyrics...')
 
-        for line in tqdm(lyrics[1]["lyrics"].splitlines(), position=1):
+        for line in tqdm(unique_lyrics, position=1):
             if not line:
                 continue
             parphrased_lyrics = paraphrase_lyrics(line, 4)
