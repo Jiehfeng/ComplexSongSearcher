@@ -399,9 +399,9 @@ def batch():
     dataset = pd.read_csv("song_lyrics_processed.csv", skiprows=start, nrows=number_of_times)
     print("Read CSV.")
 
-    for thing in dataset:
+    """for thing in dataset.iterrows():
         print(thing)
-        print(type(thing))
+        print(type(thing))"""
 
     batch_submit_func(dataset)
 
@@ -433,7 +433,7 @@ def batch_submit_func(formatted_lyric_sets):
     artist = request.args.get("artist")
     lyrics = request.args.get("lyrics")
 
-    for index, lyrics in enumerate(tqdm(formatted_lyric_sets, position=0)):
+    for index, lyrics in enumerate(tqdm(formatted_lyric_sets.iterrows(), position=0)):
         formatted_lyrics = json.dumps({"Lyrics": lyrics["lyrics"]})
 
         paraphrased = ""
