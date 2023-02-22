@@ -49,13 +49,16 @@ def paraphrase_lyrics(lyrics, number_of_variations):
                                                       max_length=60,
                                                       return_tensors="pt").to(torch_device)
     num_beams = len(lyrics.split()) + 5
-    processed_phrases = model.generate(**lyrical_phrases,
-                                           max_length=100,
-                                           num_beams=num_beams,
-                                           num_return_sequences=number_of_variations,
-                                           temperature=1.5)
+    try:
+        processed_phrases = model.generate(**lyrical_phrases,
+                                               max_length=100,
+                                               num_beams=num_beams,
+                                               num_return_sequences=number_of_variations,
+                                               temperature=1.5)
 
-    paraphrased_lyrics = tokenizer.batch_decode(processed_phrases, skip_special_tokens=True)
+        paraphrased_lyrics = tokenizer.batch_decode(processed_phrases, skip_special_tokens=True)
+    except IndexError:
+        return lyrics
     return paraphrased_lyrics
 
 
@@ -440,7 +443,7 @@ def batch_submit_func(formatted_lyric_sets):
         print('[SONG SEARCHER] - Paraphrasing lyrics...')
 
         for line in tqdm(unique_lyrics, position=1):
-            if not line or line == "" or line is None or len(line.split()) <= 3:
+            if not line or line == "" or line is None:
                 continue
             paraphrased_lyrics = paraphrase_lyrics(line, 4)
             for para in paraphrased_lyrics:
