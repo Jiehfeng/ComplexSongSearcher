@@ -399,6 +399,10 @@ def batch():
     dataset = pd.read_csv("song_lyrics_processed.csv", skiprows=start, nrows=number_of_times)
     print("Read CSV.")
 
+    for thing in dataset:
+        print(thing)
+        print(type(thing))
+
     batch_submit_func(dataset)
 
 
