@@ -430,13 +430,13 @@ def batch_submit_func(formatted_lyric_sets):
     lyrics = request.args.get("lyrics")
 
     for index, lyrics in enumerate(tqdm(formatted_lyric_sets, position=0)):
-        formatted_lyrics = json.dumps({"Lyrics": lyrics})
+        formatted_lyrics = json.dumps({"Lyrics": lyrics["lyrics"]})
 
         paraphrased = ""
         sys.stderr.flush()
         print('[SONG SEARCHER] - Paraphrasing lyrics...')
 
-        for line in tqdm(lyrics["Lyrics"].splitlines(), position=1):
+        for line in tqdm(lyrics["lyrics"].splitlines(), position=1):
             if not line:
                 continue
             parphrased_lyrics = paraphrase_lyrics(line, 4)
@@ -445,17 +445,17 @@ def batch_submit_func(formatted_lyric_sets):
 
         other = json.dumps({"Paraphrased Lyrics": paraphrased})
 
-        print("ORIGINAL LYRICS: {}\n\n".format(lyrics["Lyrics"]))
+        print("ORIGINAL LYRICS: {}\n\n".format(lyrics["lyrics"]))
         print("PARAPHRASED LYRICS: {}\n\n".format(paraphrased))
 
         try:
-            cur.execute("INSERT INTO songs (title, artist, lyrics, other) VALUES (%s, %s, %s, %s)", (lyrics["Title"],
-                                                                                                     lyrics["Artist"],
+            cur.execute("INSERT INTO songs (title, artist, lyrics, other) VALUES (%s, %s, %s, %s)", (lyrics["title"],
+                                                                                                     lyrics["artist"],
                                                                                                      formatted_lyrics,
                                                                                                      other))
             conn.commit()
 
-            print("ORIGINAL LYRICS: {}\n\n".format(lyrics))
+            print("ORIGINAL LYRICS: {}\n\n".format(lyrics["lyrics"]))
             print("PARAPHRASED LYRICS: {}\n\n".format(paraphrased))
         except:
             print('[Song Searcher] - Sorry, song submission failed. Try again. (ERROR BELOW)')
